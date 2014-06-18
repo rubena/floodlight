@@ -18,6 +18,8 @@ package net.floodlightcontroller.loadbalancer;
 
 import java.io.IOException;
 
+import net.floodlightcontroller.packet.IPv4;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -32,10 +34,13 @@ public class LBMemberSerializer extends JsonSerializer<LBMember>{
         jGen.writeStartObject();
         
         jGen.writeStringField("id", member.id);
-        jGen.writeStringField("address", String.valueOf(member.address));
+        jGen.writeStringField("address", IPv4.fromIPv4Address(member.address));
         jGen.writeStringField("port", Short.toString(member.port));
         jGen.writeStringField("poolId", member.poolId);
         jGen.writeStringField("vipId", member.vipId);
+        jGen.writeStringField("freecpu", member.freecpu);
+        jGen.writeStringField("freememory", member.freememory);
+        jGen.writeStringField("timestamp", Long.toString(member.timestamp));
 
         jGen.writeEndObject();
     }

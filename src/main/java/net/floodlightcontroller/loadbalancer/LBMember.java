@@ -17,6 +17,7 @@
 package net.floodlightcontroller.loadbalancer;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.util.Date;
 
 /**
  * Data structure for Load Balancer based on
@@ -39,6 +40,10 @@ public class LBMember {
     protected String poolId;
     protected String vipId;
     
+    protected String freecpu;
+    protected String freememory;
+    protected long timestamp;
+    
     public LBMember() {
         id = String.valueOf((int) (Math.random()*10000));
         address = 0;
@@ -50,5 +55,12 @@ public class LBMember {
         status = 0;
         poolId = null;
         vipId = null;
+        
+        freecpu = String.valueOf((int) (0));
+        freememory = String.valueOf((int) (0));
+        
+        Date date = new Date();
+        
+        timestamp = date.getTime();
     }
 }

@@ -136,7 +136,19 @@ public class MembersResource extends ServerResource {
             if (n.equals("pool_id")) {
                 member.poolId = jp.getText();
                 continue;
-            } 
+            } else
+            if (n.equals("freecpu")) {
+                member.freecpu = jp.getText();
+                continue;
+            } else
+            if (n.equals("freememory")) {
+                member.freememory = jp.getText();
+                continue;
+            }
+            if (n.equals("timestamp")) {
+                member.timestamp = Integer.parseInt(jp.getText());
+                continue;
+            }
             
             log.warn("Unrecognized field {} in " +
                     "parsing Members", 

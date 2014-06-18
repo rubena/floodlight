@@ -83,6 +83,7 @@ import net.floodlightcontroller.topology.NodePortTuple;
 import net.floodlightcontroller.util.MACAddress;
 import net.floodlightcontroller.util.OFMessageDamper;
 
+import java.util.Date;
 /**
  * A simple load balancer module for ping, tcp, and udp flows. This module is accessed 
  * via a REST API defined close to the OpenStack Quantum LBaaS (Load-balancer-as-a-Service)
@@ -119,6 +120,10 @@ public class LoadBalancer implements IFloodlightModule,
     protected HashMap<Integer, MACAddress> vipIpToMac;
     protected HashMap<Integer, String> memberIpToId;
     protected HashMap<IPClient, LBMember> clientToMember;
+    
+    protected int i;
+    
+    protected Date date = new Date();
     
     //Copied from Forwarding with message damper routine for pushing proxy Arp 
     protected static int OFMESSAGE_DAMPER_CAPACITY = 10000; // ms. 
@@ -237,7 +242,55 @@ public class LoadBalancer implements IFloodlightModule,
                     
                     LBVip vip = vips.get(vipIpToId.get(destIpAddress));
                     LBPool pool = pools.get(vip.pickPool(client));
-                    LBMember member = members.get(pool.pickMember(client));
+                    
+                    LBMember member, member2;
+                    //member = members.get(pool.pickMember(client));
+                    /*while ((date.getTime() - member.timestamp) > 4000){
+                        member = members.get(pool.pickMember(client));
+                    }*/
+                    date = new Date();
+                    
+                    do {
+                        member = members.get(pool.pickMember(client));
+                    } 
+                    while((date.getTime() - member.timestamp) > 4000);
+                   
+                    //member = members.get(pool.pickMember(client));
+                    
+                    System.out.format("Members: %d \n", members.size());
+                    member2 = member;
+                    
+                    for (i=1; i<members.size(); i++)
+                    {
+                        member2 = members.get(pool.pickMember(client));
+                        System.out.format("Valor de date %d \n", date.getTime());
+                        System.out.format("Valor de timestamp1 %d \n", member.timestamp);
+                        System.out.format("Valor de timestamp2 %d \n", member2.timestamp);
+                        System.out.format("Diferencia de timestamp member1 %d \n", date.getTime()-member.timestamp);
+                        System.out.format("Diferencia de timestamp member2 %d \n", date.getTime()-member2.timestamp);
+                        if((date.getTime()-member2.timestamp) < 4000){
+                            System.out.format("Comparando %d con %d \n", Integer.parseInt(member.id), Integer.parseInt(member2.id));
+                            if(Integer.parseInt(member2.freecpu) >= Integer.parseInt(member.freecpu) && Integer.parseInt(member2.freememory) >= Integer.parseInt(member.freememory)){
+                                member = member2;
+                            }
+                            else if(Integer.parseInt(member2.freecpu) >= Integer.parseInt(member.freecpu) && Integer.parseInt(member2.freememory) < Integer.parseInt(member.freememory)){
+                                if(Integer.parseInt(member2.freememory)>10){
+                                    member = member2;
+                                }
+                            }
+                            else if(Integer.parseInt(member2.freecpu) < Integer.parseInt(member.freecpu) && Integer.parseInt(member2.freememory) > Integer.parseInt(member.freememory)){
+                                if(Integer.parseInt(member.freememory)<10 && Integer.parseInt(member2.freecpu) > 20){
+                                    member = member2;
+                                }
+                            }
+                        }
+                        else{
+                            System.out.format("Miembro %d caido \n", Integer.parseInt(member2.id));
+                        }
+                        
+                    }
+                    
+                    System.out.format("Redirigiendo a servidor con id %d \n", Integer.parseInt(member.id));
 
                     // for chosen member, check device manager and find and push routes, in both directions                    
                     pushBidirectionalVipRoutes(sw, pi, cntx, client, member);
