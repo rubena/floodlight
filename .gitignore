@@ -14,3 +14,12 @@ findbugs-results
 /thrift
 *.idea/*
 *.iml
+
+
+#ignore this directories
+target
+bin
+
+#ignore this files
+
+
