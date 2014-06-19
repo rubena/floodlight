@@ -243,6 +243,8 @@ public class LoadBalancer implements IFloodlightModule,
                     LBVip vip = vips.get(vipIpToId.get(destIpAddress));
                     LBPool pool = pools.get(vip.pickPool(client));
                     
+                    log.info("PickMember");
+
                     LBMember member, member2;
                     //member = members.get(pool.pickMember(client));
                     /*while ((date.getTime() - member.timestamp) > 4000){
