@@ -98,6 +98,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.openflow.protocol.OFFlowMod;
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFType;
@@ -2027,6 +2028,15 @@ public class Controller implements IFloodlightProviderService,
     @Override
     public void handleOutgoingMessage(IOFSwitch sw, OFMessage m,
                                       FloodlightContext bc) {
+    	
+    	switch (m.getType()) {
+		case FLOW_MOD:
+			OFFlowMod fm = (OFFlowMod) m;
+			fm.setIdleTimeout((short) 5);   // infinite
+			m = (OFMessage) fm;
+            
+    	}
+    	
         if (sw == null)
             throw new NullPointerException("Switch must not be null");
         if (m == null)
