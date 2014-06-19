@@ -21,7 +21,6 @@ var AppRouter = Backbone.Router.extend({
     routes:{
         "":"home",
         "topology":"topology",
-        "loadbalancer":"loadbalancer",
         "switches":"switchList",
         "switch/:id":"switchDetails",
         "switch/:id/port/:p":"portDetails", // not clear if needed
@@ -54,15 +53,6 @@ var AppRouter = Backbone.Router.extend({
         // TODO factor this code out
         $('ul.nav > li').removeClass('active');
         $('li > a[href*="topology"]').parent().addClass('active');
-    },
-
-    loadbalancer:function () {
-        //console.log("switching to loadbalancer view");
-        var loadbalan = new Loadbalancer();
-        $('#content').html(new LoadbalancerView({model:loadbalan}).render().el);
-        // TODO factor this code out
-        $('ul.nav > li').removeClass('active');
-        $('li > a[href*="loadbalancer"]').parent().addClass('active');
     },
     
     switchDetails:function (id) {
@@ -103,7 +93,7 @@ var hl  = new HostCollection();
 
 var updating = true;
 
-tpl.loadTemplates(['home', "loadbalancer",'status', 'topology', 'header', 'switch', 'switch-list', 'switch-list-item', 'host', 'host-list', 'host-list-item', 'port-list', 'port-list-item', 'flow-list', 'flow-list-item'],
+tpl.loadTemplates(['home', 'status', 'topology', 'header', 'switch', 'switch-list', 'switch-list-item', 'host', 'host-list', 'host-list-item', 'port-list', 'port-list-item', 'flow-list', 'flow-list-item'],
     function () {
         app = new AppRouter();
         Backbone.history.start({pushState: true});
