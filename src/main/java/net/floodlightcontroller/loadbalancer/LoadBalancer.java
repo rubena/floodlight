@@ -119,6 +119,9 @@ public class LoadBalancer implements IFloodlightModule,
     protected HashMap<Integer, MACAddress> vipIpToMac;
     protected HashMap<Integer, String> memberIpToId;
     protected HashMap<IPClient, LBMember> clientToMember;
+
+    boolean on_same_island = false;
+    boolean on_same_if = false;
     
     //Copied from Forwarding with message damper routine for pushing proxy Arp 
     protected static int OFMESSAGE_DAMPER_CAPACITY = 10000; // ms. 
@@ -415,16 +418,18 @@ public class LoadBalancer implements IFloodlightModule,
         
         // Validate that we have a destination known on the same island
         // Validate that the source and destination are not on the same switchport
-        boolean on_same_island = false;
-        boolean on_same_if = false;
+        
         for (SwitchPort dstDap : dstDevice.getAttachmentPoints()) {
             long dstSwDpid = dstDap.getSwitchDPID();
             Long dstIsland = topology.getL2DomainId(dstSwDpid);
             if ((dstIsland != null) && dstIsland.equals(srcIsland)) {
                 on_same_island = true;
+                log.debug("Estan en la misma isla");
                 if ((sw.getId() == dstSwDpid) &&
                         (pi.getInPort() == dstDap.getPort())) {
                     on_same_if = true;
+                    log.debug("Estan en el mismo interfaz");
+
                 }
                 break;
             }
@@ -445,7 +450,8 @@ public class LoadBalancer implements IFloodlightModule,
                         "switch/port {}/{}, Action = NOP", 
                         sw.toString(), pi.getInPort());
             }
-            return;
+            // Aunque estén en el mismo interfaz no se cancela
+            // return;
         }
         
         // Install all the routes where both src and dst have attachment
@@ -548,13 +554,27 @@ public class LoadBalancer implements IFloodlightModule,
                                + "dl_type="+LB_ETHER_TYPE+","
                                + "in_port="+String.valueOf(path.get(i).getPortId());
 
-                   if (sw == pinSwitch) {
-                       actionString = "set-dst-ip="+IPv4.fromIPv4Address(member.address)+"," 
-                                + "set-dst-mac="+member.macString+","
-                                + "output="+path.get(i+1).getPortId();
+                   if (on_same_if==true){
+                        log.debug("Packet out para el mismo interfaz");
+                        if (sw == pinSwitch) {
+                           actionString = "set-dst-ip="+IPv4.fromIPv4Address(member.address)+"," 
+                                    + "set-dst-mac="+member.macString+","
+                                    + "output="+OFPP_IN_PORT;
+                       } else {
+                           actionString =
+                                   "output="+OFPP_IN_PORT;
+                       }
+
+
                    } else {
-                       actionString =
-                               "output="+path.get(i+1).getPortId();
+                       if (sw == pinSwitch) {
+                           actionString = "set-dst-ip="+IPv4.fromIPv4Address(member.address)+"," 
+                                    + "set-dst-mac="+member.macString+","
+                                    + "output="+path.get(i+1).getPortId();
+                       } else {
+                           actionString =
+                                   "output="+path.get(i+1).getPortId();
+                       }
                    }
                } else {
                    entryName = "outbound-vip-"+ member.vipId+"-client-"+client.ipAddress+"-port-"+client.targetPort
@@ -565,13 +585,25 @@ public class LoadBalancer implements IFloodlightModule,
                                + "dl_type="+LB_ETHER_TYPE+","
                                + "in_port="+String.valueOf(path.get(i).getPortId());
 
-                   if (sw == pinSwitch) {
-                       actionString = "set-src-ip="+IPv4.fromIPv4Address(vips.get(member.vipId).address)+","
-                               + "set-src-mac="+vips.get(member.vipId).proxyMac.toString()+","
-                               + "output="+path.get(i+1).getPortId();
-                   } else {
-                       actionString = "output="+path.get(i+1).getPortId();
-                   }
+                    if (on_same_if==true){
+                        log.debug("Packet out para el mismo interfaz");
+                        if (sw == pinSwitch) {
+                           actionString = "set-src-ip="+IPv4.fromIPv4Address(vips.get(member.vipId).address)+","
+                                   + "set-src-mac="+vips.get(member.vipId).proxyMac.toString()+","
+                                   + "output="+OFPP_IN_PORT;
+                       } else {
+                           actionString = "output="+OFPP_IN_PORT;
+                       }
+
+                    } else {
+                       if (sw == pinSwitch) {
+                           actionString = "set-src-ip="+IPv4.fromIPv4Address(vips.get(member.vipId).address)+","
+                                   + "set-src-mac="+vips.get(member.vipId).proxyMac.toString()+","
+                                   + "output="+path.get(i+1).getPortId();
+                       } else {
+                           actionString = "output="+path.get(i+1).getPortId();
+                       }
+                    }
                    
                }
                
