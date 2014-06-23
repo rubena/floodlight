@@ -249,8 +249,10 @@ public class LoadBalancer implements IFloodlightModule,
                     // Comprobacion de que se esté enviando informacion de CPU
                     Boolean isCPUBalancing = false;
                     int i = Integer.parseInt(member.id);
+                    int maxServers = 10;
                     // Un id nunca va a ser 0
                     int j = 0;
+                    int iterator = 0;
                     while (i!=j){
                         if(Integer.parseInt(member.freecpu) != 0){
                             isCPUBalancing = true;
@@ -271,9 +273,13 @@ public class LoadBalancer implements IFloodlightModule,
 
                             do {
                                 member = members.get(pool.pickMember(client));
-
+                                if ((date.getTime() - member.timestamp) > 4000){
+                                	member.freecpu = String.valueOf((int) (0));
+                                	member.freememory = String.valueOf((int) (0));
+                                }  
+                                iterator ++;
                             } 
-                            while((date.getTime() - member.timestamp) > 4000 || member.port != 80);
+                            while((date.getTime() - member.timestamp) > 4000 || member.port != 80 && iterator < maxServers);
                            
                             //member = members.get(pool.pickMember(client));
                             
@@ -283,13 +289,13 @@ public class LoadBalancer implements IFloodlightModule,
                             for (i=1; i<members.size(); i++)
                             {
                                 member2 = members.get(pool.pickMember(client));
-                                System.out.format("Valor de date %d \n", date.getTime());
-                                System.out.format("Valor de timestamp1 %d \n", member.timestamp);
-                                System.out.format("Valor de timestamp2 %d \n", member2.timestamp);
-                                System.out.format("Diferencia de timestamp member1 %d \n", date.getTime()-member.timestamp);
-                                System.out.format("Diferencia de timestamp member2 %d \n", date.getTime()-member2.timestamp);
+                                //System.out.format("Valor de date %d \n", date.getTime());
+                                //System.out.format("Valor de timestamp1 %d \n", member.timestamp);
+                                //System.out.format("Valor de timestamp2 %d \n", member2.timestamp);
+                                //System.out.format("Diferencia de timestamp member1 %d \n", date.getTime()-member.timestamp);
+                                //System.out.format("Diferencia de timestamp member2 %d \n", date.getTime()-member2.timestamp);
                                 if((date.getTime()-member2.timestamp) < 4000){
-                                    System.out.format("Comparando %d con %d \n", Integer.parseInt(member.id), Integer.parseInt(member2.id));
+                                    //System.out.format("Comparando %d con %d \n", Integer.parseInt(member.id), Integer.parseInt(member2.id));
                                     if(Integer.parseInt(member2.freecpu) >= Integer.parseInt(member.freecpu) && Integer.parseInt(member2.freememory) >= Integer.parseInt(member.freememory)){
                                         member = member2;
                                     }
