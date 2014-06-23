@@ -249,7 +249,8 @@ public class LoadBalancer implements IFloodlightModule,
                     // Comprobacion de que se esté enviando informacion de CPU
                     Boolean isCPUBalancing = false;
                     int i = Integer.parseInt(member.id);
-                    int j;
+                    // Un id nunca va a ser 0
+                    int j = 0;
                     while (i!=j){
                         if(Integer.parseInt(member.freecpu) != 0){
                             isCPUBalancing = true;
