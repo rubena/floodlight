@@ -242,8 +242,6 @@ public class LoadBalancer implements IFloodlightModule,
                     
                     LBVip vip = vips.get(vipIpToId.get(destIpAddress));
                     LBPool pool = pools.get(vip.pickPool(client));
-
-                    
                     LBMember member = members.get(pool.pickMember(client));
 
                     // Comprobacion de que se esté enviando informacion de CPU
