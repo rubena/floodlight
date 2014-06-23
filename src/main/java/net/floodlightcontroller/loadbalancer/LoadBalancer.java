@@ -623,7 +623,7 @@ public class LoadBalancer implements IFloodlightModule,
                            +"-srcswitch-"+path.get(0).getNodeId()+"-sw-"+sw;
                    matchString = "nw_src="+IPv4.fromIPv4Address(client.ipAddress)+","
                                + "nw_proto="+String.valueOf(client.nw_proto)+","
-                               + "tp_src="+String.valueOf(client.srcPort & 0xffff)+","
+                               //+ "tp_src="+String.valueOf(client.srcPort & 0xffff)+","
                                + "dl_type="+LB_ETHER_TYPE+","
                                + "in_port="+String.valueOf(path.get(i).getPortId());
 
@@ -640,7 +640,7 @@ public class LoadBalancer implements IFloodlightModule,
                            +"-srcswitch-"+path.get(0).getNodeId()+"-sw-"+sw;
                    matchString = "nw_dst="+IPv4.fromIPv4Address(client.ipAddress)+","
                                + "nw_proto="+String.valueOf(client.nw_proto)+","
-                               + "tp_dst="+String.valueOf(client.srcPort & 0xffff)+","
+                               //+ "tp_dst="+String.valueOf(client.srcPort & 0xffff)+","
                                + "dl_type="+LB_ETHER_TYPE+","
                                + "in_port="+String.valueOf(path.get(i).getPortId());
 
