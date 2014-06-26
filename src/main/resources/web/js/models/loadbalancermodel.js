@@ -27,14 +27,14 @@ window.Loadbalancer = Backbone.Model.extend({
     initialize:function () {
         var self = this;
         console.log("fetching loadbalancer")
+        var tiempo = new Date();
+        var status;
         $.ajax({
             url:hackBase + self.urlvip,
                   dataType:"json",
                   success:function (data) {
                       console.log("fetched loadbalancer: " + data.length);
-                      // console.log(data);
-                      //self.address = {};
-                      //self.port = [];
+      
                       var i=1;
                       var cadena = '<div id="demo' + i +'"></div>'
                       for (i; i<=data.length; i++){
@@ -53,29 +53,21 @@ window.Loadbalancer = Backbone.Model.extend({
                               dataType:"json",
                               success:function (data) {
                                   console.log("fetched loadbalancer: " + data.length);
-                                  // console.log(data);
-                                  //self.address = {};
-                                  //self.port = [];
-
-                                  
+                                              
                                   cadena = '<h2>VIP id: ' + v.id + ' IP Address: [' + v.address + ']</h2><table class="table table-striped loadbalancer-table"><tbody><tr><th>IP Address</th><th>Port</th><th>Free CPU</th><th>Free Memory</th><th>Status</th></tr>';
                                   console.log("cadena 1: " + cadena);
 
                                   _.each(data, function(h) {
                                     console.log("fetched address: " + h.address);
                                     console.log("fetched port: " + h.port);
-                                      //h.id = h.mac[0];
-                                      //console.log("fetched data");
-                                      // old_ids = _.without(old_ids, h.id);
-                                      // if (h['attachmentPoint'].length > 0) {
-                                      //     h.swport = _.reduce(h['attachmentPoint'], function(memo, ap) {
-                                      //         return memo + ap.switchDPID + "-" + ap.port + " "}, "");
-                                      //     //console.log(h.swport);
-                                      //     h.lastSeen = new Date(h.lastSeen).toLocaleString();
-                                           //self.add(h, {silent: true});
-                                      // }
+                                      var downtime = tiempo.getTime()-h.timestamp;
+                                      if (downtime < 10000){
+                                        status = "OK";
+                                      } else {
+                                        status = "DOWN";
+                                      }
                                       if (v.id == h.vipId){
-                                       cadena = cadena + "<tr><th>" + h.address + "</th><th>" + h.port + "</th><th>" + h.freecpu + "</th><th>" + h.freememory + "</th><th>OK</th></tr>";
+                                       cadena = cadena + "<tr><th>" + h.address + "</th><th>" + h.port + "</th><th>" + h.freecpu + "</th><th>" + h.freememory + "</th><th>" + status + "</th></tr>";
 
                                       }
                                       
@@ -83,52 +75,13 @@ window.Loadbalancer = Backbone.Model.extend({
 
                                   cadena = cadena + "</tbody></table>"
                                   document.getElementById("demo" + v.id).innerHTML = cadena;
-                                  // step 1: build unique array of switch IDs
-                                  /* this doesn't work if there's only one switch,
-                                     because there are no switch-switch links
-                                  _.each(data, function (l) {
-                                      self.nodes[l['src-switch']] = true;
-                                      self.nodes[l['dst-switch']] = true;
-                                  });
-                                  // console.log(self.nodes);
-                                  var nl = _.keys(self.nodes);
-                                  */
-                                  /*
-                                  var nl = swl.pluck('id');
-                                  self.nodes = _.map(nl, function (n) {return {name:n}});
-
-                                  // step 2: build array of links in format D3 expects
-                                  _.each(data, function (l) {
-                                      self.links.push({source:nl.indexOf(l['src-switch']),
-                                                       target:nl.indexOf(l['dst-switch']),
-                                                       value:10});
-                                  });
-                                  // console.log(self.nodes);
-                                  // console.log(self.links);
-                                  self.trigger('change');
-                                  //self.set(data);
-                                  */
+                               
                               }
                           });
                           i++;
 
-
-
-
-
-
-
-
-
-
-
-
                       });
                     }
-
-
-
-
 
         });
               
